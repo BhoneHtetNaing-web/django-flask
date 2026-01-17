@@ -1,0 +1,27 @@
+name: Deploy Flask App
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: SSH Deploy
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /var/www/flask_admin
+          git pull
+          source venv/bin/activate
+          pip install -r requirements.txt
+          flask db upgrade
+          sudo systemctl restart flask_app
+          sudi systemctl restart celery

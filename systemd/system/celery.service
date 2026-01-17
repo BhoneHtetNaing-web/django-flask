@@ -1,0 +1,12 @@
+[Unit]
+Description=Celery Worker
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/flask_admin
+ExecStart=/var/www/flask_admin/venv/bin/celery -A celery_app worker --loglevel=info
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

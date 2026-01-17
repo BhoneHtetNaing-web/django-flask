@@ -1,9 +1,9 @@
 from flask import Flask, render_template, redirect, url_for, request
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, admin_required
 from config import Config
 from extensions import db, login_manager
 from models import User, Product
-from forms import LoginForm, ProductForm
+from forms import LoginForm, ProductForm, UserForm
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 
 app = Flask(__name__)
@@ -92,7 +92,7 @@ def users():
 @app.route("/users/create", methods=["GET", "POST"])
 @admin_required
 def user_create():
-    form = Userform()
+    form = UserForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, role=form.role.data)
         user.set_password(form.password.data)
@@ -117,3 +117,10 @@ def api_products():
         {"name": p.name, "price": p.price}
         for p in Product.query.all()
     ]}
+
+@app.route("/api/upload", methods=["POST"])
+@jwt_required()
+def upload():
+    file = request.files["file"]
+    file.save(f"uploads/{file.filename}")
+    return {"success": True}
